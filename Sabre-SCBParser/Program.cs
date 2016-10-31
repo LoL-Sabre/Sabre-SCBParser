@@ -10,7 +10,7 @@ namespace Sabre_SCBParser
     {
         static void Main(string[] args)
         {
-            SCBFile s = new SCBFile("aatrox_skin02_q_pulse_01.scb");
+            SCBFile s = new SCBFile("GhostBowl.SCB");
             Console.WriteLine("> Magic = " + s.header.Magic);
             Console.WriteLine("> Version = " + s.header.Major + "." + s.header.Minor);
             Console.WriteLine("> Name = " + s.header.Name);

@@ -18,22 +18,36 @@ namespace Sabre_SCBParser
         {
             br = new BinaryReader(File.Open(fileLocation, FileMode.Open));
             header = new Header(br);
-            for(int i = 0; i < header.NumberOfVertices; i++)
+            if(header.Major == 3 && header.Minor == 2)
             {
-                Vertices.Add(new Vertex(br));
-            }
-            if(header.IsUnknownPresent == 1)
+                for (int i = 0; i < header.NumberOfVertices; i++)
+                {
+                    Vertices.Add(new Vertex(br));
+                }
+                if (header.IsUnknownPresent == 1)
+                {
+                    br.ReadBytes((int)header.NumberOfVertices * 4);
+                    br.ReadBytes(12);
+                }
+                else
+                {
+                    br.ReadBytes(12);
+                }
+                for (int i = 0; i < header.NumberOfFaces; i++)
+                {
+                    Faces.Add(new Face(br));
+                }
+            }   
+            else if(header.Major == 2 && header.Minor == 2)
             {
-                br.ReadBytes((int)header.NumberOfVertices * 4);
-                br.ReadBytes(12);
-            }
-            else
-            {
-                br.ReadBytes(12);
-            }
-            for (int i = 0; i < header.NumberOfFaces; i++)
-            {
-                Faces.Add(new Face(br));
+                for (int i = 0; i < header.NumberOfVertices + 1; i++)
+                {
+                    Vertices.Add(new Vertex(br));
+                }
+                for (int i = 0; i < header.NumberOfFaces; i++)
+                {
+                    Faces.Add(new Face(br));
+                }
             }
         }
         public class Header
@@ -48,24 +62,42 @@ namespace Sabre_SCBParser
             public float[] Min = new float[3];
             public float[] Max = new float[3];
             public UInt32 IsUnknownPresent;
+            public UInt32 IsColored; //v2
             public Header(BinaryReader br)
             {
                 Magic = Encoding.ASCII.GetString(br.ReadBytes(8));
                 Major = br.ReadUInt16();
                 Minor = br.ReadUInt16();
                 Name = Encoding.ASCII.GetString(br.ReadBytes(128));
-                NumberOfVertices = br.ReadUInt32();
-                NumberOfFaces = br.ReadUInt32();
-                Two = br.ReadUInt32();
-                for(int i = 0; i < 3; i++)
+                if(Major == 3 && Minor == 2)
                 {
-                    Min[i] = br.ReadSingle();
+                    NumberOfVertices = br.ReadUInt32();
+                    NumberOfFaces = br.ReadUInt32();
+                    Two = br.ReadUInt32();
+                    for (int i = 0; i < 3; i++)
+                    {
+                        Min[i] = br.ReadSingle();
+                    }
+                    for (int i = 0; i < 3; i++)
+                    {
+                        Max[i] = br.ReadSingle();
+                    }
+                    IsUnknownPresent = br.ReadUInt32();
                 }
-                for (int i = 0; i < 3; i++)
+                else if(Major == 2 && Minor == 2)
                 {
-                    Max[i] = br.ReadSingle();
+                    NumberOfVertices = br.ReadUInt32();
+                    NumberOfFaces = br.ReadUInt32();
+                    IsColored = br.ReadUInt32();
+                    for (int i = 0; i < 3; i++)
+                    {
+                        Min[i] = br.ReadSingle();
+                    }
+                    for (int i = 0; i < 3; i++)
+                    {
+                        Max[i] = br.ReadSingle();
+                    }
                 }
-                IsUnknownPresent = br.ReadUInt32();
             }
         }
         public class Vertex
