@@ -102,11 +102,5 @@ namespace Sabre_SCBParser
                 }
             }
         }
-        public static long CalculateOffset(uint VertexCount)
-        {
-            long offset = VertexCount * 12;
-            offset += 12;
-            return offset;
-        }
     }
 }
